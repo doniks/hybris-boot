@@ -404,17 +404,22 @@ if [ "$DONE_SWITCH" = "no" ]; then
         log "Mer Debug: done debug, disabling storage"
     fi
 
+    # Remount the target as ro if it provides the .halium-ro file
+    if [ -e /target/.halium-ro ]; then
+        mount /target -o remount,ro
+    fi
+
     # Disable mdev hotplug now - let udev handle it in main boot
     echo "" > /proc/sys/kernel/hotplug
 
     if [ -f "/target/init-debug" ]; then
-        log "exec switch_root /target /init-debug"
-        exec switch_root /target /init-debug &> /target/init-debug-stderrout
+        log "exec switch_root /target /init-debug" | tee -a /target/data/init-debug-stderrout
+        exec switch_root /target /init-debug >> /target/data/init-debug-stderrout 2>&1
     else
         # Prefer /sbin/preinit over /sbin/init
         [ -x /target/sbin/preinit ] && INIT=/sbin/preinit || INIT=/sbin/init
-        log "exec switch_root /target $INIT"
-        exec switch_root /target $INIT &> /target/init-stderrout
+        log "exec switch_root /target $INIT" | tee -a /target/data/init-stderrout
+        exec switch_root /target $INIT >> /target/data/init-stderrout 2>&1
     fi
     blink 7
     log "after exec switch_root"
