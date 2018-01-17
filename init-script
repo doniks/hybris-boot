@@ -183,8 +183,8 @@ mount_stowaways() {
         mount $DATA_PARTITION /data
         retval=$?
         if [ $retval -ne 0 ] ; then
-            blink 5
             log "Failed to mount /data [$retval]" >> /diagnosis.log
+            blink 5
             DEBUG_REASON="/data not mounted"
             return
         fi
@@ -193,8 +193,8 @@ mount_stowaways() {
         mount /data/rootfs.img /target
         retval=$?
         if [ $retval -ne 0 ] ; then
-            blink 6
             log "Failed to mount /target [$retval]" >> /diagnosis.log
+            blink 6
             DEBUG_REASON="/target not mounted"
             return
         fi
@@ -408,8 +408,8 @@ if [ "$DONE_SWITCH" = "no" ]; then
         echo "hybris-boot: Booting $INIT in real rootfs" > /target/data/init-stderrout
         exec switch_root /target $INIT >> /target/data/init-stderrout 2>&1
     fi
-    blink 7
     log "after exec switch_root"
+    blink 7
     run_debug_session "Failed to boot init in real rootfs"
 
 else
