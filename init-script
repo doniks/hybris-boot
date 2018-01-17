@@ -146,7 +146,7 @@ get_opt() {
 # Minimal mounts for initrd or pre-init debug session
 do_mount_devprocsys()
 {
-    echo "########################## mounting devprocsys"
+    echo "mounting devprocsys"
     mkdir /dev
     mount -t devtmpfs devtmpfs /dev
     # telnetd needs /dev/pts/ entries
@@ -175,7 +175,7 @@ bootsplash() {
 
 
 mount_stowaways() {
-    log "########################## mounting stowaways DATA_PARTITION=\"$DATA_PARTITION\", data_subdir=\"$data_subdir\""
+    log "mounting stowaways DATA_PARTITION=\"$DATA_PARTITION\", data_subdir=\"$data_subdir\""
     if [ ! -z $DATA_PARTITION ]; then
         data_subdir="$(get_opt data_subdir)"
 
@@ -229,7 +229,7 @@ inject_loop() {
     mkfifo $INJ_STDIN
     echo "This entire directory is for debugging init - it can safely be removed" > $INJ_DIR/README
 
-    log "########################## Beginning inject loop"
+    log "Beginning inject loop"
     while : ; do
         while read IN; do
 	    if [ "$IN" = "continue" ]; then break 2;fi
@@ -237,7 +237,7 @@ inject_loop() {
         done <$INJ_STDIN
     done
     rm -rf $INJ_DIR # Clean up if we exited nicely
-    log "########################## inject loop done"
+    log "inject loop done"
 }
 
 # This sets up the USB with whatever USB_FUNCTIONS are set to
@@ -260,7 +260,7 @@ usb_setup() {
 run_debug_session() {
     breathe
     CUSTOMPRODUCT=$1
-    log "########################## Debug session : $1"
+    log "Debug session : $1"
     log "DONE_SWITCH=$DONE_SWITCH"
 
     USB_IFACE=notfound
@@ -287,7 +287,7 @@ run_debug_session() {
     echo "option subnet 255.255.255.0" >> /etc/udhcpd.conf
 
     # Be explicit about busybox so this works in a rootfs too
-    log "########################## starting dhcpd"
+    log "starting dhcpd"
     $EXPLICIT_BUSYBOX udhcpd
 
     HALT_BOOT="${2:-y}"
@@ -295,7 +295,7 @@ run_debug_session() {
 
     if [ -z $DISABLE_TELNET ]; then
     # Non-blocking telnetd
-    log "########################## starting telnetd"
+    log "starting telnetd"
     # We run telnetd on different ports pre/post-switch_root This
     # avoids problems with an unterminated pre-switch_root telnetd
     # hogging the port
