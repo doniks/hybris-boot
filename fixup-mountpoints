@@ -320,7 +320,7 @@ case "$DEVICE" in
             -e 's block/platform/msm_sdcc.1/by-name/misc mmcblk0p24 ' \
             "$@"
         ;;
-    "yuga")
+    "yuga" | "odin" | "dogo" | "pollux" | "pollux_windy")
         sed -i \
             -e 's block/platform/msm_sdcc.1/by-name/boot mmcblk0p17 ' \
             -e 's block/platform/msm_sdcc.1/by-name/system mmcblk0p24 ' \
@@ -1036,17 +1036,17 @@ case "$DEVICE" in
         ;;
     "natrium")
         sed -i \
-            -e 's /dev/block/bootdevice/by-name/boot sde36 ' \
-            -e 's /dev/block/bootdevice/by-name/recovery sda13 ' \
-            -e 's /dev/block/bootdevice/by-name/cache sda14 ' \
-            -e 's /dev/block/bootdevice/by-name/system sde39 ' \
-            -e 's /dev/block/bootdevice/by-name/userdata sda15 ' \
-            -e 's /dev/block/bootdevice/by-name/persist sda12 ' \
-            -e 's /dev/block/bootdevice/by-name/dsp sde32 ' \
-            -e 's /dev/block/bootdevice/by-name/modem sde35 ' \
-            -e 's /dev/block/bootdevice/by-name/bluetooth sde26 ' \
-            -e 's /dev/block/bootdevice/by-name/frp sda7 ' \
-            -e 's /dev/block/bootdevice/by-name/misc sda9 ' \
+            -e 's block/bootdevice/by-name/boot sde36 ' \
+            -e 's block/bootdevice/by-name/recovery sda13 ' \
+            -e 's block/bootdevice/by-name/cache sda14 ' \
+            -e 's block/bootdevice/by-name/system sde39 ' \
+            -e 's block/bootdevice/by-name/userdata sda15 ' \
+            -e 's block/bootdevice/by-name/persist sda12 ' \
+            -e 's block/bootdevice/by-name/dsp sde32 ' \
+            -e 's block/bootdevice/by-name/modem sde35 ' \
+            -e 's block/bootdevice/by-name/bluetooth sde26 ' \
+            -e 's block/bootdevice/by-name/frp sda7 ' \
+            -e 's block/bootdevice/by-name/misc sda9 ' \
             "$@"
         ;;
 
@@ -1105,6 +1105,16 @@ case "$DEVICE" in
             -e 's block/platform/sdhci-tegra.3/by-name/UDA mmcblk0p15 ' \
 	   "$@"
         ;;
+
+    "scorpion" | "scorpion_windy")
+        sed -i \
+            -e 's block/platform/msm_sdcc.1/by-name/boot mmcblk0p14 ' \
+            -e 's block/platform/msm_sdcc.1/by-name/cache mmcblk0p24 ' \
+            -e 's block/platform/msm_sdcc.1/by-name/system mmcblk0p23 ' \
+            -e 's block/platform/msm_sdcc.1/by-name/userdata mmcblk0p26 ' \
+            "$@"
+        ;;
+
     *)
 	cat <<EOF
 
