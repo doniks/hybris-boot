@@ -398,12 +398,12 @@ if [ "$DONE_SWITCH" = "no" ]; then
     echo "" > /proc/sys/kernel/hotplug
 
     if [ -f "/target/init-debug" ]; then
-        echo "hybris-boot: Running init-debug" > /target/data/init-debug-stderrout
+        log "hybris-boot: exec switch_root /target /init-debug" > /target/data/init-debug-stderrout
         exec switch_root /target /init-debug >> /target/data/init-debug-stderrout 2>&1
     else
         # Prefer /sbin/preinit over /sbin/init
         [ -x /target/sbin/preinit ] && INIT=/sbin/preinit || INIT=/sbin/init
-        log "hybris-boot: Booting $INIT in real rootfs" > /target/data/init-stderrout
+        log "hybris-boot: exec switch_root /target $INIT" > /target/data/init-stderrout
         exec switch_root /target $INIT >> /target/data/init-stderrout 2>&1
     fi
     log "after exec switch_root"
