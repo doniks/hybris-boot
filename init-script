@@ -23,6 +23,7 @@
 set -x
 exec > /init.log 2>&1
 echo "Running Mer Boat Loader"
+[ -f /dev/kmsg ] || mknod -m 600 /dev/kmsg c 1 11
 
 BOOTLOGO=%BOOTLOGO%
 ALWAYSDEBUG=%ALWAYSDEBUG%
@@ -30,9 +31,7 @@ DATA_PARTITION=%DATA_PART%
 DEFAULT_OS=%DEFAULT_OS%
 DEBUG_REASON=
 
-
 log(){
-
     # log to std out
     echo "$*"
 
@@ -41,7 +40,6 @@ log(){
     [ -w $ANDROID_USB/iSerial ] && echo -n "$*" > $ANDROID_USB/iSerial ; sleep 1
 
     # log to kernel log
-    # this only works after do_mount_devprocsys()
     [ -w /dev/kmsg ] && echo "init-script: $*" >> /dev/kmsg
 }
 
@@ -146,7 +144,7 @@ get_opt() {
 # Minimal mounts for initrd or pre-init debug session
 do_mount_devprocsys()
 {
-    echo "mounting devprocsys"
+    log "mounting devprocsys"
     mkdir /dev
     mount -t devtmpfs devtmpfs /dev
     # telnetd needs /dev/pts/ entries
@@ -199,8 +197,8 @@ mount_stowaways() {
             return
         fi
 
-        mkdir -p /target/data # in new fs
-        mount --bind /data/${data_subdir} /target/data
+	mkdir -p /target/data # in new fs
+	mount --bind /data/${data_subdir} /target/data
     else
         log "Failed to mount /target, device node '$DATA_PARTITION' not found!" >> /diagnosis.log
     fi
@@ -255,11 +253,10 @@ usb_setup() {
       write $ANDROID_USB/enable        1
 }
 
-
 run_debug_session() {
     breathe
     CUSTOMPRODUCT=$1
-    log "Debug session : $1"
+    log "run_debug_session : $1"
     log "DONE_SWITCH=$DONE_SWITCH"
 
     USB_IFACE=notfound
@@ -321,7 +318,7 @@ run_debug_session() {
 check_kernel_config() {
     log "Checking kernel config"
     if [ ! -e /proc/config.gz ]; then
-        log "No /proc/config.gz. Enable CONFIG_IKCONFIG and CONFIG_IKCONFIG_PROC" | tee -a /diagnosis.log
+        log "No /proc/config.gz. Enable CONFIG_IKCONFIG and CONFIG_IKCONFIG_PROC" >> /diagnosis.log
     else
 	# Must be =y
 	for x in CONFIG_CGROUPS CONFIG_AUTOFS4_FS CONFIG_DEVTMPFS_MOUNT CONFIG_DEVTMPFS CONFIG_UNIX CONFIG_INOTIFY_USER CONFIG_SYSVIPC CONFIG_NET CONFIG_PROC_FS CONFIG_SIGNALFD CONFIG_SYSFS CONFIG_TMPFS_POSIX_ACL CONFIG_VT; do
@@ -371,7 +368,7 @@ if [ "$DONE_SWITCH" = "no" ]; then
     COUNT_VOLUP=$( dmesg | grep "Pressed KEY_VOLUMEUP" | wc -l )
     [ "$COUNT_VOLUP" -ge 3 ] && DBG_REASON="Repeated VOLUMEUP"
 
-    log "DBG_REASON=$DBG_REASON"
+    log "DBG_REASON=\"$DBG_REASON\""
 
     if ! [ "$DBG_REASON" = "" ] ; then
 	# During debug we export mmc too (some variations in location here)
@@ -405,7 +402,7 @@ if [ "$DONE_SWITCH" = "no" ]; then
     else
         # Prefer /sbin/preinit over /sbin/init
         [ -x /target/sbin/preinit ] && INIT=/sbin/preinit || INIT=/sbin/init
-        log "exec switch_root /target $INIT" | tee -a /target/data/init-stderrout
+        log "exec switch_root /target $INIT" > /target/data/init-stderrout
         exec switch_root /target $INIT >> /target/data/init-stderrout 2>&1
     fi
     log "after exec switch_root"
@@ -435,5 +432,3 @@ else
     exec $INIT &> /boot/systemd_stdouterr
     run_debug_session "init in real rootfs failed"
 fi
-log "end"
-
