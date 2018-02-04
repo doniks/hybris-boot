@@ -23,6 +23,7 @@
 set -x
 exec > /init.log 2>&1
 echo "Running Mer Boat Loader"
+[ -f /dev/kmsg ] || mknod -m 600 /dev/kmsg c 1 11
 
 BOOTLOGO=%BOOTLOGO%
 ALWAYSDEBUG=%ALWAYSDEBUG%
@@ -46,7 +47,6 @@ if [ "$0" = "/init-debug" ]; then
 fi
 
 log(){
-
     # log to std out
     echo "$*"
 
@@ -55,7 +55,6 @@ log(){
     [ -w $ANDROID_USB/iSerial ] && echo -n "$*" > $ANDROID_USB/iSerial ; sleep 1
 
     # log to kernel log
-    # this only works after do_mount_devprocsys()
     [ -w /dev/kmsg ] && echo "init-script: $*" >> /dev/kmsg
 }
 
@@ -146,7 +145,7 @@ get_opt() {
 # Minimal mounts for initrd or pre-init debug session
 do_mount_devprocsys()
 {
-    echo "mounting devprocsys"
+    log "mounting devprocsys"
     mkdir /dev
     mount -t devtmpfs devtmpfs /dev
     # telnetd needs /dev/pts/ entries
@@ -256,11 +255,10 @@ usb_setup() {
       write $ANDROID_USB/enable        1
 }
 
-
 run_debug_session() {
     breathe
     CUSTOMPRODUCT=$1
-    log "Debug session : $1"
+    log "run_debug_session : $1"
     log "DONE_SWITCH=$DONE_SWITCH"
 
     USB_IFACE=notfound
@@ -372,7 +370,7 @@ if [ "$DONE_SWITCH" = "no" ]; then
     COUNT_VOLUP=$( dmesg | grep "Pressed KEY_VOLUMEUP" | wc -l )
     [ "$COUNT_VOLUP" -ge 3 ] && DBG_REASON="Repeated VOLUMEUP"
 
-    log "DBG_REASON=$DBG_REASON"
+    log "DBG_REASON=\"$DBG_REASON\""
     if ! [ "$DBG_REASON" = "" ] ; then
 	# During debug we export mmc too (some variations in location here)
 	lun=/sys/class/android_usb/f_mass_storage/lun/file
@@ -405,7 +403,7 @@ if [ "$DONE_SWITCH" = "no" ]; then
     else
         # Prefer /sbin/preinit over /sbin/init
         [ -x /target/sbin/preinit ] && INIT=/sbin/preinit || INIT=/sbin/init
-        echo "hybris-boot: Booting $INIT in real rootfs" > /target/data/init-stderrout
+        log "hybris-boot: Booting $INIT in real rootfs" > /target/data/init-stderrout
         exec switch_root /target $INIT >> /target/data/init-stderrout 2>&1
     fi
     log "after exec switch_root"
