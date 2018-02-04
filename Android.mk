@@ -23,7 +23,7 @@ HYBRIS_PATH:=$(LOCAL_PATH)
 # image specific kernel COMMANDLINE vars is provided but whether it
 # works or not is down to your bootloader.
 
-HYBRIS_BOOTIMG_COMMANDLINE :=
+HYBRIS_BOOTIMG_COMMANDLINE := cgroup_disable=memory abcd
 HYBRIS_RECOVERYIMG_COMMANDLINE := bootmode=debug
 HYBRIS_BOOTLOGO :=
 # BOOT
