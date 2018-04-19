@@ -29,6 +29,7 @@ BOOTLOGO=%BOOTLOGO%
 ALWAYSDEBUG=%ALWAYSDEBUG%
 DATA_PARTITION=%DATA_PART%
 DEFAULT_OS=%DEFAULT_OS%
+DEBUG_REASON=
 
 log(){
     # log to std out
@@ -149,11 +150,23 @@ mount_stowaways() {
     if [ ! -z $DATA_PARTITION ]; then
         data_subdir="$(get_opt data_subdir)"
 
-	mkdir /data
-	mkdir /target
+        mkdir /data
+        mount $DATA_PARTITION /data
+        retval=$?
+        if [ $retval -ne 0 ] ; then
+            log "Failed to mount /data [$retval]" >> /diagnosis.log
+            DEBUG_REASON="/data not mounted"
+            return
+        fi
 
-	mount $DATA_PARTITION /data
-	mount /data/rootfs.img /target
+        mkdir /target
+        mount /data/rootfs.img /target
+        retval=$?
+        if [ $retval -ne 0 ] ; then
+            log "Failed to mount /target [$retval]" >> /diagnosis.log
+            DEBUG_REASON="/target not mounted"
+            return
+        fi
 
 	mkdir -p /target/data # in new fs
 	mount --bind /data/${data_subdir} /target/data
