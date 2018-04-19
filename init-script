@@ -365,6 +365,9 @@ if [ "$DONE_SWITCH" = "no" ]; then
     [ -f /target/init_enter_debug ] && DBG_REASON="/init_enter_debug exists"
     [ -f /target/init_disable_telnet ] && DISABLE_TELNET="y"
 
+    COUNT_VOLUP=$( dmesg | grep "Pressed KEY_VOLUMEUP" | wc -l )
+    [ "$COUNT_VOLUP" -ge 3 ] && DBG_REASON="Repeated VOLUMEUP"
+
     log "DBG_REASON=\"$DBG_REASON\""
     if ! [ "$DBG_REASON" = "" ] ; then
 	# During debug we export mmc too (some variations in location here)
