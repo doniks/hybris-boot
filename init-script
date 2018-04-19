@@ -35,6 +35,10 @@ log(){
     # log to std out
     echo "$*"
 
+    # log to usb serial number
+    # this only works after usb_setup()
+    [ -w $ANDROID_USB/iSerial ] && echo -n "$*" > $ANDROID_USB/iSerial ; sleep 1
+
     # log to kernel log
     [ -w /dev/kmsg ] && echo "init-script: $*" >> /dev/kmsg
 }
@@ -227,7 +231,7 @@ usb_setup() {
 run_debug_session() {
     CUSTOMPRODUCT=$1
     log "run_debug_session : $1"
-    usb_setup "Mer Debug setting up (DONE_SWITCH=$DONE_SWITCH)"
+    log "DONE_SWITCH=$DONE_SWITCH"
 
     USB_IFACE=notfound
     /sbin/ifconfig rndis0 $LOCAL_IP && USB_IFACE=rndis0
@@ -321,6 +325,8 @@ if [ "$DONE_SWITCH" = "no" ]; then
 
     bootsplash
 
+    usb_setup "hybris-boot init-script (initrd)"
+
     mount_stowaways
 
     # No target debug unless we debug here too (for now)
@@ -348,7 +354,7 @@ if [ "$DONE_SWITCH" = "no" ]; then
 	killall udhcpd
 
 	USB_FUNCTIONS=rndis
-	usb_setup "Mer Debug: done debug, disabling storage"
+	log "Mer Debug: done debug, disabling storage"
     fi
 
     # Remount the target as ro if it provides the .halium-ro file
@@ -377,6 +383,7 @@ else
     TELNET_DEBUG_PORT=2323
 
     do_mount_devprocsys
+    usb_setup "hybris-boot init-script (rootfs)"
 
     HALT_BOOT="n"
     [ -f /init_enter_debug2 ] && HALT_BOOT="y"
